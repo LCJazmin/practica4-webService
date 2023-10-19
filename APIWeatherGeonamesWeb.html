@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Meteorológica por información Geográfica</title>
+</head>
+<body>
+    <h1>Consulta Meteorológica por información Geográfica</h1>
+    <label for="ciudad">Lugar:</label>
+    <input type="text" id="ciudadInput" placeholder="Escribe el nombre de la ciudad">
+    <button onclick="obtenerInformacionUbicacion()">Consultar</button>
+    <div><br>
+        <div id="resultadoGeografica"></div>
+        <div id="resultadoMeteorologico"></div>
+    </div>
+    
+    <script>
+        function obtenerInformacionUbicacion() {
+            const username = "lcjazmin_"; // Reemplaza con tu API Key de OpenWeatherMap
+            const lugar = document.getElementById("ciudadInput").value;
+            const url = `http://api.geonames.org/searchJSON?name=${lugar}&maxRows=1&username=${username}`; 
+            
+            fetch(url)    
+                .then(response => response.json())
+                .then(data => {
+                    if (data.geonames) {
+                        const ubicacion = data.geonames[0];
+                        const resultado = `Nombre: ${ubicacion.name}<br>País: ${ubicacion.countryName}<br>Población: ${ubicacion.population}`;
+                        document.getElementById("resultadoGeografica").innerHTML = resultado;
+                        obtenerDatosMeteorologicos(ubicacion.name);
+                    } else {
+                        document.getElementById("resultadoGeografica").innerHTML = "Ubicación no encontrada.";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("resultadoGeografica").innerHTML = "Error: " + error.message;
+                });
+        }
+
+        function obtenerDatosMeteorologicos(ciudad) {
+            const apiKey = "4e02f39241345f4554632c35141a9e85"; // Reemplaza con tu API Key de OpenWeatherMa
+            const url = `http://api.openweathermap.org/data/2.5/weather?q=${ciudad}&appid=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.main && data.weather) {
+                        const temperatura = (data.main.temp - 273.15).toFixed(2) + "°C";
+                        const condicionesClimaticas = data.weather[0].description;
+                        const resultado = `Temperatura: ${temperatura}<br>Condiciones Climáticas: ${condicionesClimaticas}`;
+                        document.getElementById("resultadoMeteorologico").innerHTML = resultado;
+                    } else {
+                        document.getElementById("resultadoMeteorologico").innerHTML = "Datos meteorológicos no disponibles.";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("resultadoMeteorologico").innerHTML = "Error: " + error.message;
+                });
+        }
+    </script>
+</body>
+</html>
